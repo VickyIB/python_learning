@@ -1,0 +1,16 @@
+<!-- blog/templates/blog/post_edit.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New/Edit Post</title>
+</head>
+<body>
+    <h1>New/Edit Post</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'post_list' %}">Back to list</a>
+</body>
+</html>
