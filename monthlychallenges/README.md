@@ -292,3 +292,101 @@ Run the custom management command to populate the database with fake data:
 
 # Step 13: Verifying the Data
 - After running the script, you can verify the data by running the server and navigating to http://127.0.0.1:8000/ or checking the Django admin interface.
+
+# Step 14: Create the Model Form
+
+1. Create the Forms File:
+
+Create a file named forms.py within the challenges app:
+- touch challenges/forms.py
+
+2. Define the Model Form:
+
+Open forms.py and write the following code:
+
+        /* challenges/forms.py */
+        from django import forms
+        from .models import MonthlyChallenge
+
+        class MonthlyChallengeForm(forms.ModelForm):
+            class Meta:
+                model = MonthlyChallenge
+                fields = ['month', 'challenge_text']
+
+            def clean_month(self):
+                month = self.cleaned_data.get('month')
+                if not month.isalpha():
+                    raise forms.ValidationError('Month name should contain only letters.')
+                return month.lower()
+
+# Step 15: Update the View to Handle the Form
+
+Open views.py and write the following code to handle form rendering and submission:
+
+        /* challenges/views.py */
+        from django.shortcuts import render, redirect
+        from .forms import MonthlyChallengeForm
+
+        def add_challenge(request):
+            if request.method == 'POST':
+                form = MonthlyChallengeForm(request.POST)
+                if form.is_valid():
+                    form.save()
+                    return redirect('index')
+            else:
+                form = MonthlyChallengeForm()
+            return render(request, 'challenges/add_challenge.html', {'form': form})
+
+# Step 16: Update URLs for the Form View
+
+1. Define URLs:
+
+Open urls.py and add a path for the new view:
+
+        /* challenges/urls.py */
+        from django.urls import path
+        from . import views
+
+        urlpatterns = [
+            path('', views.index, name='index'),
+            path('add/', views.add_challenge, name='add_challenge'),
+            path('<str:month>/', views.monthly_challenge, name='monthly_challenge'),
+        ]
+
+# Step 17: Create the Template for the Form
+
+1. Create the Template File:
+
+Create a file named add_challenge.html within the templates/challenges directory:
+- touch challenges/templates/challenges/add_challenge.html
+
+2. Write the Template:
+
+Open add_challenge.html and write the following code:
+
+        <!-- challenges/templates/challenges/add_challenge.html -->
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Add Monthly Challenge</title>
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
+        </head>
+        <body>
+            <h1>Add Monthly Challenge</h1>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Add Challenge</button>
+            </form>
+            <a href="{% url 'index' %}">Back to all challenges</a>
+        </body>
+        </html>
+
+# Step 18: Run the Server and Test
+
+1. Run the Development Server:
+- python manage.py runserver
+
+2. Access the Application: 
+- Open your browser and go to http://127.0.0.1:8000/add/ to access the form for adding new monthly challenges. Fill in the form and submit to test the validation and saving functionality.
