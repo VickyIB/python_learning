@@ -1,0 +1,15 @@
+<!-- challenges/templates/challenges/challenge.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    {% load challenges_filters %}
+    <title>{{ challenge.month|capitalize }} Challenge</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
+</head>
+<body>
+    <h1>{{ challenge.month|capitalize }} Challenge</h1>
+    <p>{{ challenge.challenge_text }}</p>
+    <a href="{% url 'index' %}">Back to all challenges</a>
+</body>
+</html>
