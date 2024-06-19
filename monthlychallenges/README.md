@@ -232,3 +232,63 @@ Open the challenges/admin.py file and register the MonthlyChallenge model:
 - Click "Add Monthly Challenge" to add new challenges.
 - Fill in the month and challenge_text fields.
 - Save the changes.
+
+# Step 10:  Install the Faker Library
+
+Faker is a Python package that generates fake data for you.
+- conda install faker / pip install faker
+
+# Step 11: Create a Management Command to Populate the Database
+
+1. Create the Management Command Directory:
+
+Create a directory for custom management commands within the challenges app:
+- mkdir -p challenges/management/commands
+
+2. Create an Empty __init__.py File:
+
+Create empty __init__.py files to ensure Python treats these directories as packages:
+- touch challenges/management/__init__.py
+- touch challenges/management/commands/__init__.py
+
+3. Create the Management Command Script:
+
+Create a script named populate_challenges.py within the commands directory:
+- touch challenges/management/commands/populate_challenges.py
+
+4. Write the Population Script:
+
+Open populate_challenges.py and write the following code:
+
+        /* challenges/management/commands/populate_challenges.py */
+        from django.core.management.base import BaseCommand
+        from challenges.models import MonthlyChallenge
+        from faker import Faker
+        import random
+
+        class Command(BaseCommand):
+            help = 'Populate the MonthlyChallenge model with fake data'
+
+            def handle(self, *args, **kwargs):
+                fake = Faker()
+                months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ]
+
+                # Clear existing data
+                MonthlyChallenge.objects.all().delete()
+
+                for month in months:
+                    challenge_text = fake.sentence(nb_words=10)
+                    MonthlyChallenge.objects.create(month=month, challenge_text=challenge_text)
+
+                self.stdout.write(self.style.SUCCESS('Successfully populated the MonthlyChallenge model'))
+
+# Step 12: Run the Population Script
+
+Run the custom management command to populate the database with fake data:
+- python manage.py populate_challenges
+
+# Step 13: Verifying the Data
+- After running the script, you can verify the data by running the server and navigating to http://127.0.0.1:8000/ or checking the Django admin interface.
