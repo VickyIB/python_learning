@@ -1,18 +1,14 @@
-<!-- challenges/templates/challenges/add_challenge.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Monthly Challenge</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
-</head>
-<body>
-    <h1>Add Monthly Challenge</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Add Challenge</button>
-    </form>
-    <a href="{% url 'index' %}">Back to all challenges</a>
-</body>
-</html>
+<!-- templates/challenges/add_challenge.html -->
+{% extends 'challenges/base.html' %}
+
+{% block title %}Add Monthly Challenge{% endblock %}
+
+{% block content %}
+<h2>Add Monthly Challenge</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Challenge</button>
+</form>
+<a href="{% url 'index' %}">Back to all challenges</a>
+{% endblock %}

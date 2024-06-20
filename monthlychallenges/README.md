@@ -390,3 +390,254 @@ Open add_challenge.html and write the following code:
 
 2. Access the Application: 
 - Open your browser and go to http://127.0.0.1:8000/add/ to access the form for adding new monthly challenges. Fill in the form and submit to test the validation and saving functionality.
+
+# How to create dynamic url for templates
+
+Creating dynamic URLs for templates in Django involves using the URL routing system and the {% url %} template tag. This allows you to generate URLs dynamically based on the parameters passed to the view.
+
+1. Define URLs in urls.py:
+
+Open the urls.py file in your app and define URL patterns with dynamic segments. For example, in the challenges app:
+
+        /* challenges/urls.py */
+        from django.urls import path
+        from . import views
+
+        urlpatterns = [
+            path('', views.index, name='index'),
+            path('add/', views.add_challenge, name='add_challenge'),
+            path('<str:month>/', views.monthly_challenge, name='monthly_challenge'),
+        ]
+
+In this example, the URL pattern '<str:month>/' is dynamic and will capture any string value passed to it, which can be used in the monthly_challenge view.
+
+2. Define Views in views.py:
+
+Open the views.py file and define the views corresponding to the URL patterns:
+
+        /* challenges/views.py */
+        from django.shortcuts import render, get_object_or_404
+        from .models import MonthlyChallenge
+        from .forms import MonthlyChallengeForm
+
+        def index(request):
+            challenges = MonthlyChallenge.objects.all()
+            return render(request, 'challenges/index.html', {'challenges': challenges})
+
+        def add_challenge(request):
+            if request.method == 'POST':
+                form = MonthlyChallengeForm(request.POST)
+                if form.is_valid():
+                    form.save()
+                    return redirect('index')
+            else:
+                form = MonthlyChallengeForm()
+            return render(request, 'challenges/add_challenge.html', {'form': form})
+
+        def monthly_challenge(request, month):
+            challenge = get_object_or_404(MonthlyChallenge, month=month)
+            return render(request, 'challenges/challenge.html', {'challenge': challenge})
+
+3. Dynamic URLs in Templates:
+
+Use the {% url %} template tag to generate dynamic URLs in your templates.
+
+- index.html
+
+        <!-- challenges/templates/challenges/index.html -->
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Monthly Challenges</title>
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
+        </head>
+        <body>
+            <h1>Monthly Challenges</h1>
+            <ul>
+                {% for challenge in challenges %}
+                <li>
+                    <a href="{% url 'monthly_challenge' challenge.month %}">{{ challenge.month|capitalize }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'add_challenge' %}">Add New Challenge</a>
+        </body>
+        </html>
+
+- challenge.html
+
+        <!-- challenges/templates/challenges/challenge.html -->
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{{ challenge.month|capitalize }} Challenge</title>
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
+        </head>
+        <body>
+            <h1>{{ challenge.month|capitalize }} Challenge</h1>
+            <p>{{ challenge.challenge_text }}</p>
+            <a href="{% url 'index' %}">Back to all challenges</a>
+        </body>
+        </html>
+
+- add_challenge.html
+
+        <!-- challenges/templates/challenges/add_challenge.html -->
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Add Monthly Challenge</title>
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
+        </head>
+        <body>
+            <h1>Add Monthly Challenge</h1>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Add Challenge</button>
+            </form>
+            <a href="{% url 'index' %}">Back to all challenges</a>
+        </body>
+        </html>
+
+By following these steps, you set up dynamic URLs in Django using the URL routing system and the {% url %} template tag. This allows your templates to generate URLs dynamically based on the context and parameters passed to the views. This is particularly useful for linking to detail pages, editing forms, and other views that require specific parameters.
+
+# Inherit the template one to another template for reuse
+
+Template inheritance is a powerful feature in Django that allows you to create a base template with common structure and then extend it in other templates to avoid code duplication. This is particularly useful when you want to maintain a consistent layout across different pages of your application. Below, I'll provide a step-by-step guide to set up template inheritance along with dynamic URLs using Django's {% url %} template tag.
+
+1. Create the Base Template
+
+Create a file named base.html in your templates directory. This template will contain the common structure (e.g., header, footer) for your site.
+
+        <!-- templates/challenges/base.html -->
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{% block title %}My Site{% endblock %}</title>
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
+        </head>
+        <body>
+            <header>
+                <h1>Welcome to My Site</h1>
+                <nav>
+                    <ul>
+                        <li><a href="{% url 'index' %}">Home</a></li>
+                        <li><a href="{% url 'add_challenge' %}">Add Challenge</a></li>
+                    </ul>
+                </nav>
+            </header>
+
+            <div>
+                {% block content %}{% endblock %}
+            </div>
+
+            <footer>
+                <p>&copy; 2024 My Site</p>
+            </footer>
+        </body>
+        </html>
+
+2. Extend the Base Template in Other Templates
+
+- Index Template:
+
+Modify a file named index.html in your templates directory and extend the base.html template:
+
+        <!-- templates/challenges/index.html -->
+        {% extends 'base.html' %}
+        {% load challenges_filters %}
+        {% block title %}Home{% endblock %}
+
+        {% block content %}
+        <h1>Monthly Challenges</h1>
+        <ul>
+            {% for challenge in challenges %}
+            <li>
+                <a href="{% url 'monthly_challenge' month=challenge.month %}">{{ challenge.month|capitalize }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endblock %}
+
+- Add Challenge Template:
+
+Modify a file named add_challenge.html in your templates directory and extend the base.html template:
+
+        <!-- templates/challenges/add_challenge.html -->
+        {% extends 'base.html' %}
+
+        {% block title %}Add Monthly Challenge{% endblock %}
+
+        {% block content %}
+        <h2>Add Monthly Challenge</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Add Challenge</button>
+        </form>
+        <a href="{% url 'index' %}">Back to all challenges</a>
+        {% endblock %}
+
+- Monthly Challenge Template:
+
+Modify a file named challenge.html in your templates directory and extend the base.html template:
+
+        <!-- templates/challenges/challenge.html -->
+        {% extends 'challenges/base.html' %}
+        {% load challenges_filters %}
+        {% block title %}{{ challenge.month|capitalize }} Challenge{% endblock %}
+
+        {% block content %}
+        <h2>{{ challenge.month|capitalize }} Challenge</h2>
+        <p>{{ challenge.challenge_text }}</p>
+        <a href="{% url 'index' %}">Back to all challenges</a>
+        {% endblock %}
+
+3. Define URL Patterns
+
+- Update urls.py
+
+        /* challenges/urls.py */
+        from django.urls import path
+        from . import views
+
+        urlpatterns = [
+            path('', views.index, name='index'),
+            path('add/', views.add_challenge, name='add_challenge'),
+            path('<str:month>/', views.monthly_challenge, name='monthly_challenge'),
+        ]
+
+4. Define Views
+
+- Update views.py:
+
+Ensure your views handle the corresponding logic and render the correct templates:
+
+        /* challenges/views.py */
+        from django.shortcuts import render, get_object_or_404, redirect
+        from .models import MonthlyChallenge
+        from .forms import MonthlyChallengeForm
+
+        def index(request):
+            challenges = MonthlyChallenge.objects.all()
+            return render(request, 'challenges/index.html', {'challenges': challenges})
+
+        def monthly_challenge(request, month):
+            challenge = get_object_or_404(MonthlyChallenge, month=month)
+            return render(request, 'challenges/challenge.html', {'challenge': challenge})
+
+        def add_challenge(request):
+            if request.method == 'POST':
+                form = MonthlyChallengeForm(request.POST)
+                if form.is_valid():
+                    form.save()
+                    return redirect('index')
+            else:
+                form = MonthlyChallengeForm()
+            return render(request, 'challenges/add_challenge.html', {'form': form})
+

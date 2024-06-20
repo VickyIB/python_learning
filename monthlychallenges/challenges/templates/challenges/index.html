@@ -1,20 +1,16 @@
-<!-- challenges/templates/challenges/index.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Monthly Challenges</title>
-    {% load static %}
-    {% load challenges_filters %}
-    <link rel="stylesheet" type="text/css" href="{% static 'challenges/styles.css' %}">
-</head>
-<body>
-    <h1>Monthly Challenges</h1>
-    <ul>
-        {% for challenge in challenges %}
-        <li>
-            <a href="{% url 'monthly_challenge' month=challenge.month %}">{{ challenge.month|capitalize }}</a>
-        </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+<!-- templates/challenges/index.html -->
+
+{% extends "challenges/base.html"  %}
+{% load challenges_filters %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Monthly Challenges</h1>
+<ul>
+    {% for challenge in challenges %}
+    <li>
+        <a href="{% url 'monthly_challenge' month=challenge.month %}">{{ challenge.month|capitalize }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
