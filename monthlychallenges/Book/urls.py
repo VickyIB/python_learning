@@ -1,4 +1,4 @@
-"""monthlychallenges URL Configuration
+"""Book URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.1/topics/http/urls/
@@ -14,11 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from .views import BookCreateView, BookListView, BookUpdateView, BookDeleteView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('challenges.urls')),
-    path('', include('accounts.urls')),
-    path('', include('Book.urls')),
+    path('books/', BookListView.as_view(), name='book_list'),
+    path('books/create/', BookCreateView.as_view(), name='book_create'),
+    path('books/<int:pk>/edit/', BookUpdateView.as_view(), name='book_edit'),
+    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book_delete'),
 ]
